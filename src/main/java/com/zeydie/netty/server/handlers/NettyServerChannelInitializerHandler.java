@@ -1,6 +1,5 @@
 package com.zeydie.netty.server.handlers;
 
-import com.zeydie.netty.common.adapters.NettyPacketAdapter;
 import com.zeydie.netty.server.adapters.NettyServerPacketAdapter;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;

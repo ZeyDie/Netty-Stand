@@ -8,13 +8,14 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Log
 @ChannelHandler.Sharable
 public final class NettyServerPacketAdapter extends NettyPacketAdapter {
     @Override
-    public void channelActive(@NotNull final ChannelHandlerContext channelHandlerContext) {
+    public void channelActive(@NotNull final ChannelHandlerContext channelHandlerContext) throws IOException {
         log.info("channelActive");
 
         final Packet packet = new Packet(0);

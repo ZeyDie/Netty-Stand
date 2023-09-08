@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.MessageSizeEstimator;
 import io.netty.channel.RecvByteBufAllocator;
 import io.netty.channel.WriteBufferWaterMark;
-import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;

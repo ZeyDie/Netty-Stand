@@ -9,7 +9,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 
@@ -20,14 +19,11 @@ public class NettyPacketAdapter extends ChannelInboundHandlerAdapter {
             @NotNull final ChannelHandlerContext channelHandlerContext,
             @NotNull final Packet packet,
             final boolean flush
-    ) {
+    ) throws IOException {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final DataOutput dataOutput = new DataOutputStream(byteArrayOutputStream);
 
-        try (final ObjectOutput objectOutput = new ObjectOutputStream(byteArrayOutputStream)) {
-            objectOutput.writeObject(packet);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        packet.writePacketData(dataOutput);
 
         final int length = byteArrayOutputStream.size();
         final byte[] data = byteArrayOutputStream.toByteArray();
@@ -40,7 +36,7 @@ public class NettyPacketAdapter extends ChannelInboundHandlerAdapter {
         return flush ? channelHandlerContext.writeAndFlush(byteBuf) : channelHandlerContext.write(byteBuf);
     }
 
-    public @Nullable Packet read(@NotNull final ByteBuf byteBuf) {
+    public @NotNull Packet read(@NotNull final ByteBuf byteBuf) throws IOException {
         final int length = byteBuf.readInt();
         final byte[] data = new byte[length];
 
@@ -48,24 +44,19 @@ public class NettyPacketAdapter extends ChannelInboundHandlerAdapter {
             data[i] = byteBuf.readByte();
 
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+        final DataInput dataInput = new DataInputStream(byteArrayInputStream);
+        final Packet packet = new Packet(dataInput.readInt());
 
-        try (final ObjectInput objectInput = new ObjectInputStream(byteArrayInputStream)) {
-            final Object object = objectInput.readObject();
+        packet.readPacketData(dataInput);
 
-            if (object instanceof Packet)
-                return (Packet) object;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;
+        return packet;
     }
 
     @Override
     public void channelRead(
             @NotNull final ChannelHandlerContext channelHandlerContext,
             @NotNull final Object message
-    ) {
+    ) throws IOException {
         log.info("channelRead");
 
         try {
@@ -74,10 +65,8 @@ public class NettyPacketAdapter extends ChannelInboundHandlerAdapter {
             if (byteBuf.isReadable()) {
                 final Packet packet = this.read(byteBuf);
 
-                if (packet != null) {
-                    log.info(packet.toString());
-                    log.info("message " + new String(packet.getData()));
-                } else log.info("packet is null");
+                log.info(packet.toString());
+                log.info("message " + new String(packet.getData()));
             }
         } finally {
             ReferenceCountUtil.release(message);

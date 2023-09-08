@@ -2,9 +2,7 @@ package com.zeydie.netty.common;
 
 import com.zeydie.netty.api.INetty;
 import com.zeydie.netty.api.data.NettyChannelOption;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 
